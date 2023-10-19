@@ -77,3 +77,8 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 - React Native
 - Postman
 - Git
+
+## Imagens:
+<p align="center">
+  <img src="./frontend/assets/mobile.png" alt="project gif" width="500">
+</p>
