@@ -80,5 +80,5 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 ## Imagens:
 <p align="center">
-  <img src="./frontend/assets/mobile.png" alt="project gif" width="500">
+  <img src="./frontend/assets/mobile.png" alt="project gif" width="700">
 </p>
