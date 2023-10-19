@@ -44,7 +44,7 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 ```
 
-## Como rodar a app frontend localmente:
+## Como rodar a aplicação frontend localmente:
 
 ```bash
 # Com o repositório já clonado e app backend funcionando:
@@ -67,7 +67,7 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 ```
 
-## Technologias usadas:
+## Tecnologias usadas:
 - NodeJS
 - NestJS
 - Typescript
