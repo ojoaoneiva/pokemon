@@ -1,5 +1,11 @@
 # pokemon
 
+<p align="center">
+  <img src="./frontend/assets/1.gif" alt="project gif" width="100">
+  <img src="./frontend/assets/2.gif" alt="project gif" width="100">
+  <img src="./frontend/assets/3.gif" alt="project gif" width="100">
+</p>
+
 Documentação da API [aqui](https://documenter.getpostman.com/view/27685475/2s9YR9aDTu)
 
 ## About:

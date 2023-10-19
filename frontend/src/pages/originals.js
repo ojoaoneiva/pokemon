@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import axios from 'axios';
 import { API_URL } from '../../config';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 export default function Originals() {
   const [pokemons, setPokemons] = useState([]);
@@ -19,7 +21,7 @@ export default function Originals() {
       })
       .catch(error => {
         errorMessages(error)
-        });
+      });
   };
 
   const nextPage = () => {
@@ -68,70 +70,63 @@ export default function Originals() {
   }, [page]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.buttonAll} onPress={clearSearchField}>
-          <Text style={styles.buttonText}>Todos</Text>
-        </TouchableOpacity>
-        <View style={styles.search}>
-          <TextInput
-            style={[styles.searchInput]}
-            placeholder="Digite o ID"
-            value={searchId}
-            onChangeText={text => setSearchId(text)}
-          />
-          <TouchableOpacity style={styles.buttonContainer} onPress={searchPokemonById}>
-            <Text style={styles.buttonText}>Buscar</Text>
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.buttonAll} onPress={clearSearchField}>
+            <Text style={styles.buttonText}>Todos</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-      {pokemonDetails ? (
-        <View style={styles.pokemonDetails}>
-          <View style={styles.pokemon}>
-            <Text>Nome: {pokemonDetails.forms[0].name}</Text>
-            <Text>Height: {pokemonDetails.height}</Text>
-            <Text>weight: {pokemonDetails.weight}</Text>
+          <View style={styles.search}>
+            <TextInput
+              style={[styles.searchInput]}
+              placeholder="Digite o ID"
+              value={searchId}
+              onChangeText={text => setSearchId(text)}
+            />
+            <TouchableOpacity style={styles.buttonContainer} onPress={searchPokemonById}>
+              <Text style={styles.buttonText}>Buscar</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      ) : (
-        <View>
-          <Text style={styles.title}>Lista de Pokémons:</Text>
-          {pokemons.map((pokemon, index) => (
-            <View key={index} style={styles.pokemon}>
-              <Text>Id: {pokemon.url.split('/').slice(-2, -1)[0]}</Text>
-              <Text>Nome: {pokemon.name}</Text>
-              <Text>Url: {pokemon.url}</Text>
+        {pokemonDetails ? (
+          <View style={styles.pokemonDetails}>
+            <View style={styles.pokemon}>
+              <Text>Nome: {pokemonDetails.forms[0].name}</Text>
+              <Text>Height: {pokemonDetails.height}</Text>
+              <Text>weight: {pokemonDetails.weight}</Text>
             </View>
-          ))}
-          <View style={styles.paginationContainer}>
-            <TouchableOpacity
-              style={[styles.buttonPage, page <= 0 ? styles.buttonDisabled : null]}
-              onPress={prevPage}
-              disabled={page <= 0}
-            >
-              <Text style={styles.buttonText}>Anterior</Text>
-            </TouchableOpacity>
-
-            <Text>Página {pageNumber} de {totalPages}</Text>
-
-            <TouchableOpacity
-              style={[styles.buttonPage, page + 10 >= totalPokemons ? styles.buttonDisabled : null]}
-              onPress={nextPage}
-              disabled={page + 10 >= totalPokemons}
-            >
-              <Text style={styles.buttonText}>Próxima</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      )}
-    </ScrollView>
+        ) : (
+          <View>
+            <Text style={styles.title}>Lista de Pokémons:</Text>
+            {pokemons.map((pokemon, index) => (
+              <View key={index} style={styles.pokemon}>
+                <Text>Id: {pokemon.url.split('/').slice(-2, -1)[0]}</Text>
+                <Text>Nome: {pokemon.name}</Text>
+                <Text>Url: {pokemon.url}</Text>
+              </View>
+            ))}
+
+          </View>
+        )}
+      </ScrollView>
+      <View style={styles.paginationButtons}>
+        <TouchableOpacity onPress={prevPage}>
+          <FontAwesomeIcon icon={faChevronLeft} size={30} color="#656565" />
+        </TouchableOpacity>
+        <Text>Página {pageNumber} de {totalPages}</Text>
+        <TouchableOpacity onPress={nextPage}>
+          <FontAwesomeIcon icon={faChevronRight} size={30} color="#656565" />
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 30
+    padding: 30,
   },
   header: {
     flexDirection: 'column',
@@ -203,5 +198,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+  },
+  paginationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 20,
   },
 });

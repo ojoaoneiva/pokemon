@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Alert, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { API_URL } from '../../config';
 
 export default function Custom() {
@@ -16,6 +16,8 @@ export default function Custom() {
   const [editedPokemon, setEditedPokemon] = useState({ id: '', name: '', height: '', weight: '' });
   const [editedPokemonId, setEditedPokemonId] = useState(null);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
 
   const navigation = useNavigation();
 
@@ -49,21 +51,45 @@ export default function Custom() {
       setPokemonData([...pokemonData, response.data]);
       setNewPokemon({ name: '', height: '', weight: '' });
       setCreatePokemonVisible(false);
-      setOptionsVisible(false)
       Alert.alert('Novo Pokémon criado com sucesso!');
     } catch (error) {
       errorMessages(error);
     }
   };
 
-  const editPokemon = async () => {
+  const OptionsVisibility = () => {
+    setOptionsVisible(!OptionsVisible);
+  };
+
+  const nextPage = () => {
+    const nextPageNumber = pageNumber + 1;
+    if (nextPageNumber <= Math.ceil(pokemonData.length / itemsPerPage)) {
+      setPageNumber(nextPageNumber);
+    }
+  };
+
+  const prevPage = () => {
+    const prevPageNumber = pageNumber - 1;
+    if (prevPageNumber > 0) {
+      setPageNumber(prevPageNumber);
+    }
+  };
+
+  const getPokemonsForCurrentPage = () => {
+    const startIndex = (pageNumber - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return pokemonData.slice(startIndex, endIndex);
+  };
+
+  const updatePokemon = async () => {
     try {
       const authToken = await AsyncStorage.getItem('authToken');
+  
       const height = parseFloat(editedPokemon.height);
       const weight = parseFloat(editedPokemon.weight);
-
+  
       const response = await axios.put(
-        `${API_URL}/custompokemons/${editedPokemonId}`,
+        `${API_URL}/custompokemons/${editedPokemon.id}`,
         {
           name: editedPokemon.name,
           height: !isNaN(height) ? height : null,
@@ -73,15 +99,17 @@ export default function Custom() {
           headers: { Authorization: authToken },
         }
       );
-
-      const updatedPokemonData = pokemonData.map((pokemon) =>
-        pokemon.id === response.data.id ? response.data : pokemon
-      );
-      setPokemonData(updatedPokemonData);
-      setEditedPokemon({ id: '', name: '', height: '', weight: '' });
+  
+      const updatedPokemons = [...pokemonData];
+      const index = updatedPokemons.findIndex(pokemon => pokemon.id === editedPokemon.id);
+  
+      if (index !== -1) {
+        updatedPokemons[index] = response.data;
+        setPokemonData(updatedPokemons);
+      }
+  
       setEditPokemonVisible(false);
-      setOptionsVisible(false)
-      Alert.alert('Pokémon editado com sucesso!');
+      Alert.alert('Pokémon atualizado com sucesso!');
     } catch (error) {
       errorMessages(error);
     }
@@ -110,8 +138,7 @@ export default function Custom() {
     }
   };
 
-  useEffect(() => {
-    const getCustomPokemons = async () => {
+const getCustomPokemons = async () => {
       const authToken = await AsyncStorage.getItem('authToken');
       if (!authToken) {
         navigation.navigate('Login');
@@ -127,8 +154,9 @@ export default function Custom() {
       }
     };
 
+  useEffect(() => {
     getCustomPokemons();
-  }, []);
+  }, [navigation]);
 
   const editButtonClick = (id) => {
     setEditedPokemonId(id);
@@ -137,124 +165,68 @@ export default function Custom() {
 
   const moreOptionsClick = (id) => {
     setSelectedPokemon(pokemonData.find((pokemon) => pokemon.id === id));
-    setOptionsVisible(true);
+    OptionsVisibility();
     editButtonClick(id);
   };
 
+  const editPokemon = (pokemon) => {
+    setEditedPokemon(pokemon);
+    setEditPokemonVisible(true);
+    setOptionsVisible(false);
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.topButtons}>
-        <View style={styles.user}>
-          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.buttonContainer} onPress={CreatePokemonVisibility}>
-          <Text style={styles.buttonText}>Criar</Text>
-        </TouchableOpacity>
-      </View>
-
-      {isCreatePokemonVisible && (
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={isCreatePokemonVisible}
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.title}>Novo Pokémon:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nome"
-              value={newPokemon.name}
-              onChangeText={(text) => setNewPokemon({ ...newPokemon, name: text })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Altura"
-              value={newPokemon.height}
-              onChangeText={(text) => setNewPokemon({ ...newPokemon, height: text })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Peso"
-              value={newPokemon.weight}
-              onChangeText={(text) => setNewPokemon({ ...newPokemon, weight: text })}
-            />
-            <TouchableOpacity style={styles.buttonContainer} onPress={createPokemon}>
-              <Text style={styles.buttonText}>Criar Pokémon</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.signUpButton} onPress={() => setCreatePokemonVisible(false)}>
-              <Text style={styles.signUpText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      )}
-
-      {selectedPokemon && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={OptionsVisible}
-        >
-          <View style={styles.modalContainer2}>
-            <View style={styles.modalContent}>
-              <TouchableOpacity style={styles.optionButton} onPress={() => setEditPokemonVisible(true)}>
-                <Text style={styles.optionText}>Editar</Text>
+    <>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        {isCreatePokemonVisible && (
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={isCreatePokemonVisible}
+          >
+            <View style={styles.modalContainer}>
+              <Text style={styles.title}>Novo Pokémon:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nome"
+                value={newPokemon.name}
+                onChangeText={(text) => setNewPokemon({ ...newPokemon, name: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Altura"
+                value={newPokemon.height}
+                onChangeText={(text) => setNewPokemon({ ...newPokemon, height: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Peso"
+                value={newPokemon.weight}
+                onChangeText={(text) => setNewPokemon({ ...newPokemon, weight: text })}
+              />
+              <TouchableOpacity style={styles.buttonContainer} onPress={createPokemon}>
+                <Text style={styles.buttonText}>Criar Pokémon</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.optionButton} onPress={() => deletePokemon(selectedPokemon.id)}>
-                <Text style={styles.optionText}>Excluir</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.optionButton} onPress={() => setOptionsVisible(false)}>
-                <Text style={styles.optionText}>Cancelar</Text>
+              <TouchableOpacity style={styles.signUpButton} onPress={() => setCreatePokemonVisible(false)}>
+                <Text style={styles.signUpText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
-      )}
+          </Modal>
+        )}
 
-      {isEditPokemonVisible && (
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={isEditPokemonVisible}
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.title}>Editar Pokémon:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nome"
-              value={editedPokemon.name}
-              onChangeText={(text) => setEditedPokemon({ ...editedPokemon, name: text })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Altura (Opcional)"
-              value={editedPokemon.height}
-              onChangeText={(text) => setEditedPokemon({ ...editedPokemon, height: text })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Peso (Opcional)"
-              value={editedPokemon.weight}
-              onChangeText={(text) => setEditedPokemon({ ...editedPokemon, weight: text })}
-            />
-            <TouchableOpacity style={styles.buttonContainer} onPress={editPokemon}>
-              <Text style={styles.buttonText}>Editar Pokémon</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.signUpButton} onPress={() => setEditPokemonVisible(false)}>
-              <Text style={styles.signUpText}>Cancelar</Text>
+        <View style={styles.topButtons}>
+          <View style={styles.user}>
+            <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+              <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
           </View>
-        </Modal>
-      )}
+          <TouchableOpacity style={styles.buttonContainer} onPress={CreatePokemonVisibility}>
+            <Text style={styles.buttonText}>Criar</Text>
+          </TouchableOpacity>
+        </View>
 
-      <Text style={styles.title}>Lista de Pokémon Personalizados:</Text>
-      <FlatList
-        data={pokemonData}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.flatListContainer}
-        renderItem={({ item }) => (
-          <View style={styles.pokemonItem}>
+        {getPokemonsForCurrentPage().map((item) => (
+          <View key={item.id} style={styles.pokemonItem}>
             <Text>ID: {item.id}</Text>
             <Text>Nome: {item.name}</Text>
             <Text>Altura: {item.height}</Text>
@@ -265,17 +237,86 @@ export default function Custom() {
               </TouchableOpacity>
             </View>
           </View>
+        ))}
+
+        {OptionsVisible && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={OptionsVisible}
+          >
+            <View style={styles.modalContainer2}>
+              <View style={styles.modalContent}>
+                <TouchableOpacity style={styles.optionButton} onPress={() => editPokemon(selectedPokemon)}>
+                  <Text style={styles.optionText}>Editar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.optionButton} onPress={() => deletePokemon(selectedPokemon.id)}>
+                  <Text style={styles.optionText}>Excluir</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.optionButton} onPress={() => setOptionsVisible(false)}>
+                  <Text style={styles.optionText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         )}
-      />
-    </View>
+
+        {isEditPokemonVisible && (
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={isEditPokemonVisible}
+          >
+            <View style={styles.modalContainer}>
+              <Text style={styles.title}>Editar Pokémon:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nome"
+                value={editedPokemon.name}
+                onChangeText={(text) => setEditedPokemon({ ...editedPokemon, name: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Altura"
+                value={editedPokemon.height ? editedPokemon.height.toString() : ''}
+                onChangeText={(text) => setEditedPokemon({ ...editedPokemon, height: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Peso"
+                value={editedPokemon.weight ? editedPokemon.weight.toString() : ''}
+                onChangeText={(text) => setEditedPokemon({ ...editedPokemon, weight: text })}
+              />
+              <TouchableOpacity style={styles.buttonContainer} onPress={updatePokemon}>
+                <Text style={styles.buttonText}>Atualizar Pokémon</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.signUpButton} onPress={() => setEditPokemonVisible(false)}>
+                <Text style={styles.signUpText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        )}
+
+      </ScrollView>
+      <View style={styles.paginationButtons}>
+        <TouchableOpacity onPress={prevPage}>
+          <FontAwesomeIcon icon={faChevronLeft} size={30} color="#656565" />
+        </TouchableOpacity>
+        <Text>Página {pageNumber}</Text>
+        <TouchableOpacity onPress={nextPage}>
+          <FontAwesomeIcon icon={faChevronRight} size={30} color="#656565" />
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  contentContainer: {
+    alignItems: 'center'
   },
   modalContainer: {
     flex: 1,
@@ -388,5 +429,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     height: 40,
     paddingTop: 5,
+  },
+  paginationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 20,
   },
 });
