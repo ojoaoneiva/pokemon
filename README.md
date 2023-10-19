@@ -67,7 +67,7 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 ```
 
-## Technologies used:
+## Technologias usadas:
 - NodeJS
 - NestJS
 - Typescript
