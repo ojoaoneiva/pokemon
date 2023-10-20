@@ -47,7 +47,7 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 ```
 
-## Como rodar a app frontend localmente:
+## Como rodar a aplicação frontend localmente:
 
 ```bash
 # Com o repositório já clonado e app backend funcionando:
@@ -70,7 +70,7 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 ```
 
-## Technologias usadas:
+## Tecnologias usadas:
 - NodeJS
 - NestJS
 - Typescript
@@ -80,3 +80,8 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 - React Native
 - Postman
 - Git
+
+## Imagens:
+<p align="center">
+  <img src="./frontend/assets/mobile.png" alt="project gif" width="700">
+</p>
