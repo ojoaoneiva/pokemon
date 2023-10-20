@@ -34,11 +34,12 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 # Crie um arquivo .env nos moldes do .env.example com as varáveis de ambiente:
 
+# Crie um databse no postgres com mesmo nome, user, password do arquivo .env:
+
+# Modifique o arquivo ormconfig.json, nos campos username, password, database, como os mesmos valores definidos no postgres e no .env:
+
 # Instale as dependencias da aplicação:
     npm i
-
-# Execute as migraçoes do banco de dados:
-    npx typeorm migration:run
 
 # Inicie a aplicação:
     npm start
