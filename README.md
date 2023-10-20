@@ -34,6 +34,9 @@ O objetivo do projeto é construir uma aplicação full stack contendo um backen
 
 # Crie um arquivo .env nos moldes do .env.example com as varáveis de ambiente:
 
+# Execute as migraçoes do banco de dados:
+    npx typeorm migration:run
+    
 # Instale as dependencias da aplicação:
     npm i
 
