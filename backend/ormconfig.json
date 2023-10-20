@@ -2,10 +2,10 @@
     "type": "postgres",
     "host": "localhost",
     "port": 5432,
-    "username": "postgres",
-    "password": "m4f905bl",
-    "database": "pokemon",
+    "username": "USERNAME",
+    "password": "USENHA-DATABASE",
+    "database": "NOME-DATABSE",
     "entities": ["src/entities/*.ts"],
-    "synchronize": true,
+    "synchronize": false,
     "logging": true
   }
